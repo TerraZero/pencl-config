@@ -1,7 +1,8 @@
 const Path = require('path');
 const FS = require('fs');
 const Config = require('./Config');
-const { PenclError } = require('pencl-base');
+const Regex = require('pencl-base/src/Util/Regex');
+const PenclError = require('pencl-base/src/Error/PenclError');
 
 module.exports = class ConfigManager {
 
@@ -20,12 +21,20 @@ module.exports = class ConfigManager {
   }
 
   /**
+   * @param {(RegExp|string)} pattern
+   * 
    * @returns {string[]}
    */
-  list() {
+  list(pattern = null) {
+    if (typeof pattern === 'string') {
+      pattern = Regex.wildRegex(pattern);
+    }
+
     const list = [];
     for (const file of FS.readdirSync(this.path)) {
-      list.push(Path.parse(file).name);
+      const name = Path.parse(file).name;
+      if (pattern !== null && !Regex.wildTest(pattern, name)) continue;
+      list.push(name);
     }
     return list;
   }
@@ -37,7 +46,7 @@ module.exports = class ConfigManager {
    */
   get(name) {
     if (this._configs[name] === undefined) {
-      this._configs[name] = this.load(new Config(name));
+      this._configs[name] = this.load(new Config(this, name));
     }
     return this._configs[name];
   }
@@ -74,6 +83,12 @@ module.exports = class ConfigManager {
       }
     }
     return config;
+  }
+
+  saveAll() {
+    for (const name in this._configs) {
+      this._configs[name].save();
+    }
   }
 
 }

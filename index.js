@@ -5,8 +5,4 @@ module.exports = class PenclConfig {
     return require('./src/ConfigManager');
   }
 
-  static get Config() {
-    return require('./src/Config');
-  }
-
 }

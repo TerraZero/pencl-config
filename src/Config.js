@@ -42,12 +42,42 @@ module.exports = class Config {
     return this;
   }
 
-  set(field, ) {
-    
+  /**
+   * @param {string} field 
+   * @param {*} value 
+   * @param {array} args
+   * 
+   * @returns {this}
+   */
+  set(field, value, ...args) {
+    Reflection.setDeep(this.data, field, value);
+    this.changed = true;
+    return this;
   }
 
-  get() {
+  /**
+   * @param {string} field 
+   * @param {*} fallback 
+   * @param {array} args
+   * 
+   * @returns {*}
+   */
+  get(field, fallback = null, ...args) {
+    if (field.indexOf(':') !== -1) {
+      const split = field.split(':');
+      const value = Reflection.getDeep(this.data, split[0], fallback);
 
+      if (typeof value === 'object') {
+        switch (typeof value[split[1]]) {
+          case 'function':
+            return value[split[1]](...args);
+          default:
+            return value[split[1]];
+        }
+      }
+      return fallback;
+    }
+    return Reflection.getDeep(this.data, field, fallback);
   }
   
 }
