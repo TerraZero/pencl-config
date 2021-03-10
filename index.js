@@ -1,5 +1,6 @@
 const PenclPlugin = require('pencl-base/src/Boot/PenclPlugin');
 const ConfigManager = require('./src/ConfigManager');
+const PenclBase = require('pencl-base');
 
 class PenclConfig extends PenclPlugin {
 
@@ -20,7 +21,7 @@ class PenclConfig extends PenclPlugin {
 
   get manager() {
     if (this._manager === null) {
-      this._manager = new ConfigManager(this.config.path);
+      this._manager = new ConfigManager(PenclBase.getPath(this.config.path));
     }
     return this._manager;
   }
